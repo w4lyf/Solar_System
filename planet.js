@@ -16,7 +16,7 @@ export class Planet {
     this.ellipse = new THREE.Line(ellipseGeometry, ellipseMaterial);
 
     const planetGeometry = new THREE.SphereGeometry(size, 32, 32);
-    const planetMaterial = new THREE.MeshBasicMaterial({ map: texture });
+    const planetMaterial = new THREE.MeshStandardMaterial({ map: texture, metalness: 0.1, roughness: 1.0, emissive: 0x222244, emissiveIntensity: 0.1});
     this.mesh = new THREE.Mesh(planetGeometry, planetMaterial);
   }
 }

@@ -14,6 +14,10 @@ camera.position.set(0, -2500, 1200);
 camera.lookAt(0, 0, 0);
 
 const renderer = new THREE.WebGLRenderer();
+
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
@@ -57,8 +61,16 @@ const sun_material = new THREE.MeshBasicMaterial({ map: sunTexture });
 const sun = new THREE.Mesh(sun_geometry, sun_material);
 scene.add(sun);
 
+// Light source (Sun)
+const sunLight = new THREE.PointLight(0xffffff, 20000, 5000);
+sunLight.position.set(0, 0, 0);
+scene.add(sunLight);
+
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.05);
+scene.add(ambientLight);
+
 // Planet configuration
-const planetConfigs = [
+const planetConfig = [
   { name: 'mercury', semiMajor: 39, semiMinor: 38, color: 0xff0000, size: 0.122 * 35, defaultSpeed: 1.6, texture: mercuryTexture },
   { name: 'venus', semiMajor: 72, semiMinor: 71, color: 0xffffff, size: 0.304 * 35, defaultSpeed: 1.2, texture: venusTexture },
   { name: 'earth', semiMajor: 100, semiMinor: 99, color: 0x0000ff, size: 0.32 * 35, defaultSpeed: 1.0, texture: earthTexture },
@@ -71,7 +83,7 @@ const planetConfigs = [
 
 const planets = {};
 
-planetConfigs.forEach(config => {
+planetConfig.forEach(config => {
   const planet = new Planet(config.semiMajor, config.semiMinor, config.color, config.size, config.texture);
   scene.add(planet.ellipse);
   scene.add(planet.mesh);
@@ -87,12 +99,12 @@ planetConfigs.forEach(config => {
 const clock = new THREE.Clock();
 let isPaused = false;
 
-planetConfigs.forEach(config => {
+planetConfig.forEach(config => {
   const speedControl = document.getElementById(`${config.name}-speed`);
   if (speedControl) {
     speedControl.addEventListener('input', (e) => {
       const value = parseFloat(e.target.value);
-      const speed = isNaN(value) ? 0 : value;
+      const speed = value ?? 0;
       planets[config.name].currentSpeed = speed;
       planets[config.name].savedSpeed = speed;
     });
@@ -119,6 +131,7 @@ if (pausePlayBtn) {
   });
 }
 
+// Animation loop
 renderer.setAnimationLoop(() => {
   let delta = Math.min(clock.getDelta(), 0.05);
 
