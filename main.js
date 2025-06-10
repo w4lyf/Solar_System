@@ -66,7 +66,7 @@ const sunLight = new THREE.PointLight(0xffffff, 20000, 5000);
 sunLight.position.set(0, 0, 0);
 scene.add(sunLight);
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.05);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
 scene.add(ambientLight);
 
 // Planet configuration
@@ -90,6 +90,27 @@ planetConfig.forEach(config => {
 
   const tiltRad = THREE.MathUtils.degToRad(config.axialTilt || 0);
   planet.mesh.rotation.y = tiltRad;
+
+  if (config.name === 'saturn') {
+    const ringGeometry = new THREE.RingGeometry(
+      config.size * 1.1, 
+      config.size * 1.6,
+      64
+    );
+  
+    const ringTexture = textureLoader.load('./assets/saturn.jpg');
+    const ringMaterial = new THREE.MeshBasicMaterial({
+      map: ringTexture,
+      color: 0x888888,
+      side: THREE.DoubleSide,
+      transparent: true
+    });
+  
+    const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+    ring.rotation.z = Math.PI / 2; 
+    planet.mesh.add(ring); 
+  }
+  
   
   planets[config.name] = {
     object: planet,
@@ -137,6 +158,64 @@ if (pausePlayBtn) {
   });
 }
 
+const cameraSpeed = 10;
+let keysPressed = {};
+let isDragging = false;
+let previousMousePosition = { x: 0, y: 0 };
+
+window.addEventListener('keydown', (event) => {
+  keysPressed[event.key.toLowerCase()] = true;
+});
+
+window.addEventListener('keyup', (event) => {
+  keysPressed[event.key.toLowerCase()] = false;
+});
+
+window.addEventListener('mousedown', (event) => {
+  isDragging = true;
+  previousMousePosition = { x: event.clientX, y: event.clientY };
+});
+
+window.addEventListener('mousemove', (event) => {
+  if (isDragging) {
+    const deltaX = event.clientX - previousMousePosition.x;
+    const deltaY = event.clientY - previousMousePosition.y;
+
+    camera.rotation.y -= deltaX * 0.002;
+    camera.rotation.x -= deltaY * 0.002; 
+
+    previousMousePosition = { x: event.clientX, y: event.clientY };
+  }
+});
+
+window.addEventListener('mouseup', () => {
+  isDragging = false;
+});
+
+function updateCameraMovement() {
+  if (keysPressed['w']) {
+    camera.zoom += 0.05;
+    camera.updateProjectionMatrix();
+  }
+  if (keysPressed['s']) {
+    camera.zoom -= 0.05; 
+    camera.zoom = Math.max(camera.zoom, 0.1); 
+    camera.updateProjectionMatrix();
+  }
+  if (keysPressed['a']) {
+    camera.position.x -= cameraSpeed; 
+  }
+  if (keysPressed['d']) {
+    camera.position.x += cameraSpeed;
+  }
+  if (keysPressed['q']) {
+    camera.position.y += cameraSpeed;
+  }
+  if (keysPressed['e']) {
+    camera.position.y -= cameraSpeed;
+  }
+}
+
 // Animation loop
 renderer.setAnimationLoop(() => {
   let delta = Math.min(clock.getDelta(), 0.05);
@@ -150,5 +229,6 @@ renderer.setAnimationLoop(() => {
     planetData.object.mesh.rotation.z += planetData.rotationSpeed; 
   });
 
+  updateCameraMovement(); 
   renderer.render(scene, camera);
 });
