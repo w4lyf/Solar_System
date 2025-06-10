@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 export class Planet {
-  constructor(xRadius, yRadius, color, size) {
+  constructor(xRadius, yRadius, color, size, texture) {
     this.path = new THREE.EllipseCurve(
       0, 0, // ax, aY
       xRadius, yRadius, // xRadius, yRadius
@@ -16,7 +16,7 @@ export class Planet {
     this.ellipse = new THREE.Line(ellipseGeometry, ellipseMaterial);
 
     const planetGeometry = new THREE.SphereGeometry(size, 32, 32);
-    const planetMaterial = new THREE.MeshBasicMaterial({ color });
+    const planetMaterial = new THREE.MeshBasicMaterial({ map: texture });
     this.mesh = new THREE.Mesh(planetGeometry, planetMaterial);
   }
 }

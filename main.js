@@ -17,28 +17,40 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+// Load textures
+const textureLoader = new THREE.TextureLoader();
+const sunTexture = textureLoader.load('./assets/sun.png');
+const mercuryTexture = textureLoader.load('./assets/mercury.jpg');
+const venusTexture = textureLoader.load('./assets/venus.jpg');
+const earthTexture = textureLoader.load('./assets/earth.jpg');
+const marsTexture = textureLoader.load('./assets/mars.jpg');
+const jupiterTexture = textureLoader.load('./assets/jupiter.jpg');
+const saturnTexture = textureLoader.load('./assets/saturn.jpg');
+const uranusTexture = textureLoader.load('./assets/uranus.jpg');
+const neptuneTexture = textureLoader.load('./assets/neptune.jpg');
+
 // For SUN
 const sun_geometry = new THREE.SphereGeometry(35, 32, 16);
-const sun_material = new THREE.MeshBasicMaterial({ color: 0xFFFF00 });
+const sun_material = new THREE.MeshBasicMaterial({ map: sunTexture });
 const sun = new THREE.Mesh(sun_geometry, sun_material);
 scene.add(sun);
 
 // Planet configuration
 const planetConfigs = [
-  { name: 'mercury', semiMajor: 140, semiMinor: 135, color: 0xff0000, size: 7, defaultSpeed: 0.7 },
-  { name: 'venus', semiMajor: 240, semiMinor: 235, color: 0xffffff, size: 13, defaultSpeed: 0.4 },
-  { name: 'earth', semiMajor: 340, semiMinor: 335, color: 0x0000ff, size: 15, defaultSpeed: 0.6 },
-  { name: 'mars', semiMajor: 500, semiMinor: 450, color: 0xff0000, size: 10, defaultSpeed: 0.2 },
-  { name: 'jupiter', semiMajor: 700, semiMinor: 600, color: 0xFFD700, size: 25, defaultSpeed: 0.1 },
-  { name: 'saturn', semiMajor: 800, semiMinor: 700, color: 0x00008B, size: 22, defaultSpeed: 0.05 },
-  { name: 'uranus', semiMajor: 950, semiMinor: 800, color: 0x00FFFF, size: 20, defaultSpeed: 0.03 },
-  { name: 'neptune', semiMajor: 1100, semiMinor: 1000, color: 0x00008B, size: 17, defaultSpeed: 0.02 }
+  { name: 'mercury', semiMajor: 140, semiMinor: 135, color: 0xff0000, size: 7, defaultSpeed: 0.7, texture: mercuryTexture },
+  { name: 'venus', semiMajor: 240, semiMinor: 235, color: 0xffffff, size: 13, defaultSpeed: 0.4, texture: venusTexture },
+  { name: 'earth', semiMajor: 340, semiMinor: 335, color: 0x0000ff, size: 15, defaultSpeed: 0.6, texture: earthTexture },
+  { name: 'mars', semiMajor: 500, semiMinor: 450, color: 0xff0000, size: 10, defaultSpeed: 0.2, texture: marsTexture },
+  { name: 'jupiter', semiMajor: 700, semiMinor: 600, color: 0xFFD700, size: 25, defaultSpeed: 0.1, texture: jupiterTexture },
+  { name: 'saturn', semiMajor: 800, semiMinor: 700, color: 0x00008B, size: 22, defaultSpeed: 0.05, texture: saturnTexture },
+  { name: 'uranus', semiMajor: 950, semiMinor: 800, color: 0x00FFFF, size: 20, defaultSpeed: 0.03, texture: uranusTexture },
+  { name: 'neptune', semiMajor: 1100, semiMinor: 1000, color: 0x00008B, size: 17, defaultSpeed: 0.02, texture: neptuneTexture }
 ];
 
 const planets = {};
 
 planetConfigs.forEach(config => {
-  const planet = new Planet(config.semiMajor, config.semiMinor, config.color, config.size);
+  const planet = new Planet(config.semiMajor, config.semiMinor, config.color, config.size, config.texture);
   scene.add(planet.ellipse);
   scene.add(planet.mesh);
   
