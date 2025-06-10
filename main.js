@@ -29,6 +29,28 @@ const saturnTexture = textureLoader.load('./assets/saturn.jpg');
 const uranusTexture = textureLoader.load('./assets/uranus.jpg');
 const neptuneTexture = textureLoader.load('./assets/neptune.jpg');
 
+// Space background
+const particlesGeometry = new THREE.BufferGeometry();
+const particlesCount = 100; 
+const vertices = new Float32Array(particlesCount * 3); 
+
+for (let i = 0; i < particlesCount * 3; i++) {
+  vertices[i] = (Math.random() - 0.5) * 2000; 
+}
+
+particlesGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+
+const particleTexture = textureLoader.load('/assets/star.png');
+const particlesMaterial = new THREE.PointsMaterial({
+  map: particleTexture,
+  size: 2,
+  sizeAttenuation: true,
+  transparent: true,
+  opacity: 0.8,
+});
+const stars = new THREE.Points(particlesGeometry, particlesMaterial);
+scene.add(stars);
+
 // For SUN
 const sun_geometry = new THREE.SphereGeometry(35, 32, 16);
 const sun_material = new THREE.MeshBasicMaterial({ map: sunTexture });
