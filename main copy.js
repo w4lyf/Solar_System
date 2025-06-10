@@ -62,48 +62,48 @@ const sun = new THREE.Mesh(sun_geometry, sun_material);
 scene.add(sun);
 
 // Light source (Sun)
-const sunLight = new THREE.PointLight(0xffffff, 20000, 5000);
+const sunLight = new THREE.PointLight(0xffffff, 5, 10000);
 sunLight.position.set(0, 0, 0);
 scene.add(sunLight);
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.05);
-scene.add(ambientLight);
+// Ambient light (optional, low intensity)
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+//scene.add(ambientLight);
+
+const lightHelper = new THREE.PointLightHelper(sunLight, 10);
+scene.add(lightHelper);
 
 // Planet configuration
-const planetConfig = [
-  { name: 'mercury', semiMajor: 39, semiMinor: 38, color: 0xff0000, size: 0.122 * 35, defaultSpeed: 1.6, texture: mercuryTexture, rotationSpeed: 0.0094, axialTilt: 0.034 },
-  { name: 'venus',   semiMajor: 72, semiMinor: 71, color: 0xffffff, size: 0.304 * 35, defaultSpeed: 1.2, texture: venusTexture,   rotationSpeed: -0.0021, axialTilt: 177.4 },
-  { name: 'earth',   semiMajor: 100, semiMinor: 99, color: 0x0000ff, size: 0.32 * 35,  defaultSpeed: 1.0, texture: earthTexture,   rotationSpeed: 1.0,     axialTilt: 23.44 },
-  { name: 'mars',    semiMajor: 152, semiMinor: 150, color: 0xff0000, size: 0.17 * 35, defaultSpeed: 0.8, texture: marsTexture,    rotationSpeed: 1.2125,  axialTilt: 25.19 },
-  { name: 'jupiter', semiMajor: 520, semiMinor: 515, color: 0xFFD700, size: 3.51 * 35, defaultSpeed: 0.4, texture: jupiterTexture, rotationSpeed: 6.1,     axialTilt: 3.13 },
-  { name: 'saturn',  semiMajor: 958, semiMinor: 950, color: 0x00008B, size: 2.92 * 35, defaultSpeed: 0.3, texture: saturnTexture,  rotationSpeed: 7.4,     axialTilt: 26.73 },
-  { name: 'uranus',  semiMajor: 1918, semiMinor: 1900, color: 0x00FFFF, size: 1.27 * 35, defaultSpeed: 0.2, texture: uranusTexture,  rotationSpeed: -6.95,   axialTilt: 97.77 },
-  { name: 'neptune', semiMajor: 3007, semiMinor: 2990, color: 0x00008B, size: 1.24 * 35, defaultSpeed: 0.1, texture: neptuneTexture, rotationSpeed: 14.9,    axialTilt: 28.32 }
+const planetConfigs = [
+  { name: 'mercury', semiMajor: 39, semiMinor: 38, color: 0xff0000, size: 0.122 * 35, defaultSpeed: 1.6, texture: mercuryTexture },
+  { name: 'venus', semiMajor: 72, semiMinor: 71, color: 0xffffff, size: 0.304 * 35, defaultSpeed: 1.2, texture: venusTexture },
+  { name: 'earth', semiMajor: 100, semiMinor: 99, color: 0x0000ff, size: 0.32 * 35, defaultSpeed: 1.0, texture: earthTexture },
+  { name: 'mars', semiMajor: 152, semiMinor: 150, color: 0xff0000, size: 0.17 * 35, defaultSpeed: 0.8, texture: marsTexture },
+  { name: 'jupiter', semiMajor: 520, semiMinor: 515, color: 0xFFD700, size: 3.51 * 35, defaultSpeed: 0.4, texture: jupiterTexture },
+  { name: 'saturn', semiMajor: 958, semiMinor: 950, color: 0x00008B, size: 2.92 * 35, defaultSpeed: 0.3, texture: saturnTexture },
+  { name: 'uranus', semiMajor: 1918, semiMinor: 1900, color: 0x00FFFF, size: 1.27 * 35, defaultSpeed: 0.2, texture: uranusTexture },
+  { name: 'neptune', semiMajor: 3007, semiMinor: 2990, color: 0x00008B, size: 1.24 * 35, defaultSpeed: 0.1, texture: neptuneTexture }
 ];
 
 const planets = {};
 
-planetConfig.forEach(config => {
+planetConfigs.forEach(config => {
   const planet = new Planet(config.semiMajor, config.semiMinor, config.color, config.size, config.texture);
   scene.add(planet.ellipse);
   scene.add(planet.mesh);
-
-  const tiltRad = THREE.MathUtils.degToRad(config.axialTilt || 0);
-  planet.mesh.rotation.y = tiltRad;
   
   planets[config.name] = {
     object: planet,
     time: 0,
     currentSpeed: config.defaultSpeed,
-    savedSpeed: config.defaultSpeed,
-    rotationSpeed: config.rotationSpeed
+    savedSpeed: config.defaultSpeed
   };
 });
 
 const clock = new THREE.Clock();
 let isPaused = false;
 
-planetConfig.forEach(config => {
+planetConfigs.forEach(config => {
   const speedControl = document.getElementById(`${config.name}-speed`);
   if (speedControl) {
     speedControl.addEventListener('input', (e) => {
@@ -121,7 +121,6 @@ if (pausePlayBtn) {
     if (isPaused) {
       Object.keys(planets).forEach(planetName => {
         planets[planetName].currentSpeed = planets[planetName].savedSpeed;
-        planets[planetName].rotationSpeed = planetConfig.find(p => p.name === planetName).rotationSpeed;
       });
       pausePlayBtn.textContent = 'Pause';
       isPaused = false;
@@ -129,13 +128,86 @@ if (pausePlayBtn) {
       Object.keys(planets).forEach(planetName => {
         planets[planetName].savedSpeed = planets[planetName].currentSpeed;
         planets[planetName].currentSpeed = 0;
-        planets[planetName].rotationSpeed = 0;
       });
       pausePlayBtn.textContent = 'Play';
       isPaused = true;
     }
   });
 }
+
+// Variables for camera movement
+const cameraSpeed = 10; // Speed of camera movement
+let keysPressed = {}; // Track pressed keys
+let isDragging = false; // Track mouse dragging state
+let previousMousePosition = { x: 0, y: 0 };
+
+// Event listener for keydown
+window.addEventListener('keydown', (event) => {
+  keysPressed[event.key.toLowerCase()] = true;
+});
+
+// Event listener for keyup
+window.addEventListener('keyup', (event) => {
+  keysPressed[event.key.toLowerCase()] = false;
+});
+
+// Event listener for mousedown (start dragging)
+window.addEventListener('mousedown', (event) => {
+  isDragging = true;
+  previousMousePosition = { x: event.clientX, y: event.clientY };
+});
+
+// Event listener for mousemove (dragging)
+window.addEventListener('mousemove', (event) => {
+  if (isDragging) {
+    const deltaX = event.clientX - previousMousePosition.x;
+    const deltaY = event.clientY - previousMousePosition.y;
+
+    // Rotate camera based on mouse movement
+    camera.rotation.y -= deltaX * 0.002; // Horizontal rotation
+    camera.rotation.x -= deltaY * 0.002; // Vertical rotation
+
+    previousMousePosition = { x: event.clientX, y: event.clientY };
+  }
+});
+
+// Event listener for mouseup (stop dragging)
+window.addEventListener('mouseup', () => {
+  isDragging = false;
+});
+
+// Update camera position based on pressed keys
+function updateCameraMovement() {
+  if (keysPressed['w']) {
+    camera.zoom += 0.05; // Zoom in
+    camera.updateProjectionMatrix(); // Update the projection matrix after changing zoom
+  }
+  if (keysPressed['s']) {
+    camera.zoom -= 0.05; // Zoom out
+    camera.zoom = Math.max(camera.zoom, 0.1); // Prevent zooming out too far
+    camera.updateProjectionMatrix(); // Update the projection matrix after changing zoom
+  }
+  if (keysPressed['a']) {
+    camera.position.x -= cameraSpeed; // Move left
+  }
+  if (keysPressed['d']) {
+    camera.position.x += cameraSpeed; // Move right
+  }
+  if (keysPressed['q']) {
+    camera.position.y += cameraSpeed; // Move up
+  }
+  if (keysPressed['e']) {
+    camera.position.y -= cameraSpeed; // Move down
+  }
+}
+
+const testPlanet = new THREE.Mesh(
+  new THREE.SphereGeometry(35, 64, 32),
+  new THREE.MeshStandardMaterial({ map: earthTexture, metalness: 0.1, roughness: 1.0 })
+);
+testPlanet.position.set(100, 0, 0); // Shift to the side of the Sun
+testPlanet.receiveShadow = true;
+scene.add(testPlanet);
 
 // Animation loop
 renderer.setAnimationLoop(() => {
@@ -146,9 +218,8 @@ renderer.setAnimationLoop(() => {
     planetData.time = (planetData.time + delta * planetData.currentSpeed) % 1;
     const pos = planetData.object.path.getPoint(planetData.time);
     planetData.object.mesh.position.set(pos.x, pos.y, 0);
-
-    planetData.object.mesh.rotation.z += planetData.rotationSpeed; 
   });
 
+  updateCameraMovement(); // Update camera movement based on keys
   renderer.render(scene, camera);
 });
