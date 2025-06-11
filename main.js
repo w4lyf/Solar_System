@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Planet } from './planet.js';
+import { setupCameraControls } from './cameraControls.js';
 
 const scene = new THREE.Scene();
 const aspect = window.innerWidth / window.innerHeight;
@@ -69,17 +70,17 @@ scene.add(sunLight);
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
 scene.add(ambientLight);
 
-// Planet configuration
 const planetConfig = [
-  { name: 'mercury', semiMajor: 39, semiMinor: 38, color: 0xff0000, size: 0.122 * 35, defaultSpeed: 1.6, texture: mercuryTexture, rotationSpeed: 0.0094, axialTilt: 0.034 },
-  { name: 'venus',   semiMajor: 72, semiMinor: 71, color: 0xffffff, size: 0.304 * 35, defaultSpeed: 1.2, texture: venusTexture,   rotationSpeed: -0.0021, axialTilt: 177.4 },
-  { name: 'earth',   semiMajor: 100, semiMinor: 99, color: 0x0000ff, size: 0.32 * 35,  defaultSpeed: 1.0, texture: earthTexture,   rotationSpeed: 1.0,     axialTilt: 23.44 },
-  { name: 'mars',    semiMajor: 152, semiMinor: 150, color: 0xff0000, size: 0.17 * 35, defaultSpeed: 0.8, texture: marsTexture,    rotationSpeed: 1.2125,  axialTilt: 25.19 },
-  { name: 'jupiter', semiMajor: 520, semiMinor: 515, color: 0xFFD700, size: 3.51 * 35, defaultSpeed: 0.4, texture: jupiterTexture, rotationSpeed: 6.1,     axialTilt: 3.13 },
-  { name: 'saturn',  semiMajor: 958, semiMinor: 950, color: 0x00008B, size: 2.92 * 35, defaultSpeed: 0.3, texture: saturnTexture,  rotationSpeed: 7.4,     axialTilt: 26.73 },
-  { name: 'uranus',  semiMajor: 1918, semiMinor: 1900, color: 0x00FFFF, size: 1.27 * 35, defaultSpeed: 0.2, texture: uranusTexture,  rotationSpeed: -6.95,   axialTilt: 97.77 },
-  { name: 'neptune', semiMajor: 3007, semiMinor: 2990, color: 0x00008B, size: 1.24 * 35, defaultSpeed: 0.1, texture: neptuneTexture, rotationSpeed: 14.9,    axialTilt: 28.32 }
+  { name: 'mercury', semiMajor: 39, semiMinor: 38, color: 0xff0000, size: 0.122 * 35, defaultSpeed: 1.6, texture: mercuryTexture,  axialTilt: 0.034, spinsPerOrbit : 0.0625},
+  { name: 'venus',   semiMajor: 72, semiMinor: 71, color: 0xffffff, size: 0.304 * 35, defaultSpeed: 1.2, texture: venusTexture,    axialTilt: 177.4, spinsPerOrbit : -0.0386},
+  { name: 'earth',   semiMajor: 100, semiMinor: 99, color: 0x0000ff, size: 0.32 * 35,  defaultSpeed: 1.0, texture: earthTexture,    axialTilt: 23.44, spinsPerOrbit : 365.25},
+  { name: 'mars',    semiMajor: 152, semiMinor: 150, color: 0xff0000, size: 0.17 * 35, defaultSpeed: 0.8, texture: marsTexture,     axialTilt: 25.19, spinsPerOrbit : 701.22},
+  { name: 'jupiter', semiMajor: 520, semiMinor: 515, color: 0xFFD700, size: 3.51 * 35, defaultSpeed: 0.4, texture: jupiterTexture,  axialTilt: 3.13,  spinsPerOrbit : 10500},
+  { name: 'saturn',  semiMajor: 958, semiMinor: 950, color: 0x00008B, size: 2.92 * 35, defaultSpeed: 0.3, texture: saturnTexture,   axialTilt: 26.73, spinsPerOrbit : 24135},
+  { name: 'uranus',  semiMajor: 1918, semiMinor: 1900, color: 0x00FFFF, size: 1.27 * 35, defaultSpeed: 0.2, texture: uranusTexture,   axialTilt: 97.77, spinsPerOrbit : -42825},
+  { name: 'neptune', semiMajor: 3007, semiMinor: 2990, color: 0x00008B, size: 1.24 * 35, defaultSpeed: 0.1, texture: neptuneTexture,  axialTilt: 28.32, spinsPerOrbit : 89800}
 ];
+
 
 const planets = {};
 
@@ -117,7 +118,7 @@ planetConfig.forEach(config => {
     time: 0,
     currentSpeed: config.defaultSpeed,
     savedSpeed: config.defaultSpeed,
-    rotationSpeed: config.rotationSpeed
+    rotationSpeed: config.spinsPerOrbit / 365.25 * config.defaultSpeed,
   };
 });
 
@@ -132,6 +133,7 @@ planetConfig.forEach(config => {
       const speed = isNaN(value) ? 0 : value;
       planets[config.name].currentSpeed = speed;
       planets[config.name].savedSpeed = speed;
+      planets[config.name].rotationSpeed = config.spinsPerOrbit / 365.25 * speed;
     });
   }
 });
@@ -159,63 +161,7 @@ if (pausePlayBtn) {
 }
 
 const cameraSpeed = 10;
-let keysPressed = {};
-let isDragging = false;
-let previousMousePosition = { x: 0, y: 0 };
-
-window.addEventListener('keydown', (event) => {
-  keysPressed[event.key.toLowerCase()] = true;
-});
-
-window.addEventListener('keyup', (event) => {
-  keysPressed[event.key.toLowerCase()] = false;
-});
-
-window.addEventListener('mousedown', (event) => {
-  isDragging = true;
-  previousMousePosition = { x: event.clientX, y: event.clientY };
-});
-
-window.addEventListener('mousemove', (event) => {
-  if (isDragging) {
-    const deltaX = event.clientX - previousMousePosition.x;
-    const deltaY = event.clientY - previousMousePosition.y;
-
-    camera.rotation.y -= deltaX * 0.002;
-    camera.rotation.x -= deltaY * 0.002; 
-
-    previousMousePosition = { x: event.clientX, y: event.clientY };
-  }
-});
-
-window.addEventListener('mouseup', () => {
-  isDragging = false;
-});
-
-function updateCameraMovement() {
-  if (keysPressed['w']) {
-    camera.zoom += 0.05;
-    camera.updateProjectionMatrix();
-  }
-  if (keysPressed['s']) {
-    camera.zoom -= 0.05; 
-    camera.zoom = Math.max(camera.zoom, 0.1); 
-    camera.updateProjectionMatrix();
-  }
-  if (keysPressed['a']) {
-    camera.position.x -= cameraSpeed; 
-  }
-  if (keysPressed['d']) {
-    camera.position.x += cameraSpeed;
-  }
-  if (keysPressed['q']) {
-    camera.position.y += cameraSpeed;
-  }
-  if (keysPressed['e']) {
-    camera.position.y -= cameraSpeed;
-  }
-}
-
+const updateCameraMovement = setupCameraControls(camera, renderer.domElement);
 // Animation loop
 renderer.setAnimationLoop(() => {
   let delta = Math.min(clock.getDelta(), 0.05);
