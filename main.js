@@ -160,8 +160,8 @@ if (pausePlayBtn) {
   });
 }
 
-const cameraSpeed = 10;
-const updateCameraMovement = setupCameraControls(camera, renderer.domElement);
+const updateCameraMovement = setupCameraControls(camera, 10);
+
 // Animation loop
 renderer.setAnimationLoop(() => {
   let delta = Math.min(clock.getDelta(), 0.05);
