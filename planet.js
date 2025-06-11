@@ -10,7 +10,7 @@ export class Planet {
       0 // aRotation
     );
 
-    const points = this.path.getPoints(200);
+    const points = this.path.getPoints(200);  // 200 points along the ellipse
     const ellipseGeometry = new THREE.BufferGeometry().setFromPoints(points);
     const ellipseMaterial = new THREE.LineBasicMaterial({ color });
     this.ellipse = new THREE.Line(ellipseGeometry, ellipseMaterial);

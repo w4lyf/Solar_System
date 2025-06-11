@@ -2,11 +2,11 @@ import * as THREE from 'three';
 import { Planet } from './planet.js';
 import { setupCameraControls } from './cameraControls.js';
 
-const scene = new THREE.Scene();
+const scene = new THREE.Scene();  // Create a new scene
 const aspect = window.innerWidth / window.innerHeight;
-const viewSize = 4000;
+const viewSize = 4000;  // Size of the view
 
-const camera = new THREE.OrthographicCamera(
+const camera = new THREE.OrthographicCamera(  // Create an orthographic camera
   -aspect * viewSize / 2, aspect * viewSize / 2,
   viewSize / 2, -viewSize / 2,
   0.1, 15000
@@ -14,7 +14,7 @@ const camera = new THREE.OrthographicCamera(
 camera.position.set(0, -2500, 1200);
 camera.lookAt(0, 0, 0);
 
-const renderer = new THREE.WebGLRenderer();
+const renderer = new THREE.WebGLRenderer(); // Create a WebGL renderer
 
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -37,22 +37,16 @@ const neptuneTexture = textureLoader.load('./assets/neptune.jpg');
 // Space background
 const particlesGeometry = new THREE.BufferGeometry();
 const particlesCount = 200; 
-const vertices = new Float32Array(particlesCount * 3); 
+const vertices = new Float32Array(particlesCount * 3); // Create an array for the vertices
 
 for (let i = 0; i < particlesCount * 3; i++) {
-  vertices[i] = (Math.random() - 0.5) * 6000; 
+  vertices[i] = (Math.random() - 0.5) * 6000; // Random positions for the vectors
 }
 
-particlesGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+particlesGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3)); // Create a buffer attribute for stars
 
 const particleTexture = textureLoader.load('/assets/star.png');
-const particlesMaterial = new THREE.PointsMaterial({
-  map: particleTexture,
-  size: 2,
-  sizeAttenuation: true,
-  transparent: true,
-  opacity: 0.8,
-});
+const particlesMaterial = new THREE.PointsMaterial({map: particleTexture, size: 2, sizeAttenuation: true, transparent: true, opacity: 0.8});
 const stars = new THREE.Points(particlesGeometry, particlesMaterial);
 scene.add(stars);
 
@@ -63,13 +57,14 @@ const sun = new THREE.Mesh(sun_geometry, sun_material);
 scene.add(sun);
 
 // Light source (Sun)
-const sunLight = new THREE.PointLight(0xffffff, 20000, 5000);
+const sunLight = new THREE.PointLight(0xffffff, 20000, 5000); // Color, intensity, distance
 sunLight.position.set(0, 0, 0);
 scene.add(sunLight);
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // ambience for soft light on the scene
 scene.add(ambientLight);
 
+//Planet configuration, sets ellipse path, color, size, speed, texture, axial tilt and spins per orbit
 const planetConfig = [
   { name: 'mercury', semiMajor: 39, semiMinor: 38, color: 0xff0000, size: 0.122 * 35, defaultSpeed: 1.6, texture: mercuryTexture,  axialTilt: 0.034, spinsPerOrbit : 0.0625},
   { name: 'venus',   semiMajor: 72, semiMinor: 71, color: 0xffffff, size: 0.304 * 35, defaultSpeed: 1.2, texture: venusTexture,    axialTilt: 177.4, spinsPerOrbit : -0.0386},
@@ -84,7 +79,7 @@ const planetConfig = [
 
 const planets = {};
 
-planetConfig.forEach(config => {
+planetConfig.forEach(config => {  // Create planets
   const planet = new Planet(config.semiMajor, config.semiMinor, config.color, config.size, config.texture);
   scene.add(planet.ellipse);
   scene.add(planet.mesh);
@@ -92,7 +87,7 @@ planetConfig.forEach(config => {
   const tiltRad = THREE.MathUtils.degToRad(config.axialTilt || 0);
   planet.mesh.rotation.y = tiltRad;
 
-  if (config.name === 'saturn') {
+  if (config.name === 'saturn') { // Add rings to Saturn
     const ringGeometry = new THREE.RingGeometry(
       config.size * 1.1, 
       config.size * 1.6,
@@ -113,7 +108,7 @@ planetConfig.forEach(config => {
   }
   
   
-  planets[config.name] = {
+  planets[config.name] = {  // Store planet data
     object: planet,
     time: 0,
     currentSpeed: config.defaultSpeed,
@@ -125,7 +120,7 @@ planetConfig.forEach(config => {
 const clock = new THREE.Clock();
 let isPaused = false;
 
-planetConfig.forEach(config => {
+planetConfig.forEach(config => {  // Speed Control
   const speedControl = document.getElementById(`${config.name}-speed`);
   if (speedControl) {
     speedControl.addEventListener('input', (e) => {
@@ -139,19 +134,19 @@ planetConfig.forEach(config => {
 });
 
 const pausePlayBtn = document.getElementById('pause-play-btn');
-if (pausePlayBtn) {
+if (pausePlayBtn) { // Pause/Play Button logic
   pausePlayBtn.addEventListener('click', () => {
-    if (isPaused) {
+    if (isPaused) { // Play
       Object.keys(planets).forEach(planetName => {
-        planets[planetName].currentSpeed = planets[planetName].savedSpeed;
+        planets[planetName].currentSpeed = planets[planetName].savedSpeed;  // Restore saved speed
         planets[planetName].rotationSpeed = planetConfig.find(p => p.name === planetName).rotationSpeed;
       });
       pausePlayBtn.textContent = 'Pause';
       isPaused = false;
-    } else {
+    } else {  // Pause
       Object.keys(planets).forEach(planetName => {
         planets[planetName].savedSpeed = planets[planetName].currentSpeed;
-        planets[planetName].currentSpeed = 0;
+        planets[planetName].currentSpeed = 0;  // Stop the planet
         planets[planetName].rotationSpeed = 0;
       });
       pausePlayBtn.textContent = 'Play';
@@ -160,13 +155,13 @@ if (pausePlayBtn) {
   });
 }
 
-const updateCameraMovement = setupCameraControls(camera, 10);
+const updateCameraMovement = setupCameraControls(camera, 10); // Initialize camera controls
 
 // Animation loop
 renderer.setAnimationLoop(() => {
-  let delta = Math.min(clock.getDelta(), 0.05);
+  let delta = Math.min(clock.getDelta(), 0.05); // Limit delta time to avoid large jumps
 
-  Object.keys(planets).forEach(planetName => {
+  Object.keys(planets).forEach(planetName => {  // Update each planet's position and rotation
     const planetData = planets[planetName];
     planetData.time = (planetData.time + delta * planetData.currentSpeed) % 1;
     const pos = planetData.object.path.getPoint(planetData.time);
