@@ -24,10 +24,10 @@ This project is a 3D visualization of the solar system built using [Three.js](ht
 ## Installation
 
 1. Clone the repository:
-   ```bash
+  ```bash
    git clone https://github.com/your-repo/solar-system.git
    cd solar-system
-````
+  ````
 
 2. Install dependencies:
 
