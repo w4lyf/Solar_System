@@ -1,6 +1,3 @@
-Got it! Here's the full markdown for your `README.md` in a single copyable block:
-
-````markdown
 # Solar System 3D Visualization
 
 This project is a 3D visualization of the solar system built using [Three.js](https://threejs.org/). It includes interactive features such as speed control for planets, camera movement, zoom functionality, and orbit visualization.
@@ -68,20 +65,17 @@ solar-system/
 ---
 
 ## Controls
+   ```
+   Keyboard Controls
+      W: Move camera up.
+      S: Move camera down.
+      A: Move camera left.
+      D: Move camera right.
 
-### Keyboard Controls
-
-* **W**: Move camera up.
-* **S**: Move camera down.
-* **A**: Move camera left.
-* **D**: Move camera right.
-
-### Mouse Controls
-
-* **Scroll Wheel**: Zoom in/out.
-* **Drag**: Rotate the camera.
-
----
+   Mouse Controls
+      Scroll Wheel: Zoom in/out.
+      Drag: Rotate the camera.
+   ```
 
 ## How It Works
 
@@ -102,6 +96,5 @@ solar-system/
 ---
 
 ## Dependencies
-
-* [Three.js](https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js) (CDN)
-* `npx serve` for local development.
+Three.js (CDN)
+npx serve for local development.
