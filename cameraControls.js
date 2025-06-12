@@ -2,8 +2,6 @@ export function setupCameraControls(camera, cameraSpeed) {
   let keysPressed = {};
   let isDragging = false;
   let previousMousePosition = { x: 0, y: 0 };
-  let isLeftClick = false; 
-  let isRightClick = false; 
 
   window.addEventListener('keydown', (event) => {
     keysPressed[event.key.toLowerCase()] = true; // Store the key pressed state
@@ -14,13 +12,8 @@ export function setupCameraControls(camera, cameraSpeed) {
   });
 
   window.addEventListener('mousedown', (event) => {
-    if (event.button === 0) {
-      isLeftClick = true; 
-    } else if (event.button === 2) {
-      isRightClick = true;
-    }
     isDragging = true;
-    previousMousePosition = { x: event.clientX, y: event.clientY }; // Store the mouse position
+    previousMousePosition = { x: event.clientX, y: event.clientY };
   });
 
   window.addEventListener('mousemove', (event) => {
@@ -35,35 +28,33 @@ export function setupCameraControls(camera, cameraSpeed) {
     }
   });
 
-  window.addEventListener('mouseup', (event) => {
-    if (event.button === 0) {
-      isLeftClick = false;
-    } else if (event.button === 2) {
-      isRightClick = false; 
-    }
+  window.addEventListener('mouseup', () => {
     isDragging = false;
   });
 
-  function updateCameraMovement() {
-    if (keysPressed['w'] || isLeftClick) {
+  // Add scroll wheel event for zooming
+  window.addEventListener('wheel', (event) => {
+    if (event.deltaY < 0) {
       camera.zoom += 0.05;
-      camera.updateProjectionMatrix(); // Update the camera projection
-    }
-    if (keysPressed['s'] || isRightClick) {
+      camera.updateProjectionMatrix();
+    } else if (event.deltaY > 0) {
       camera.zoom -= 0.05;
       camera.zoom = Math.max(camera.zoom, 0.1); // Prevent zooming out too far
       camera.updateProjectionMatrix();
     }
+  });
+
+  function updateCameraMovement() {
     if (keysPressed['a']) {
       camera.position.x -= cameraSpeed;
     }
     if (keysPressed['d']) {
       camera.position.x += cameraSpeed;
     }
-    if (keysPressed['q']) {
+    if (keysPressed['w']) {
       camera.position.y += cameraSpeed;
     }
-    if (keysPressed['e']) {
+    if (keysPressed['s']) {
       camera.position.y -= cameraSpeed;
     }
   }

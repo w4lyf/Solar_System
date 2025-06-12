@@ -130,8 +130,6 @@ planetConfig.forEach(config => {  // Create planets
   };
 });
 
-const clock = new THREE.Clock();
-let isPaused = false;
 
 planetConfig.forEach(config => {  // Speed Control
   const speedControl = document.getElementById(`${config.name}-speed`);
@@ -145,6 +143,8 @@ planetConfig.forEach(config => {  // Speed Control
     });
   }
 });
+
+let isPaused = false;
 
 const pausePlayBtn = document.getElementById('pause-play-btn');
 if (pausePlayBtn) { // Pause/Play Button logic
@@ -168,12 +168,13 @@ if (pausePlayBtn) { // Pause/Play Button logic
   });
 }
 
+const clock = new THREE.Clock();
 const updateCameraMovement = setupCameraControls(camera, 10); // Initialize camera controls
 
 // Animation loop
 renderer.setAnimationLoop(() => {
   let delta = Math.min(clock.getDelta(), 0.05); // Limit delta time to avoid large jumps
-
+  
   Object.keys(planets).forEach(planetName => {  // Update each planet's position and rotation
     const planetData = planets[planetName];
     planetData.time = (planetData.time + delta * planetData.currentSpeed) % 1;
