@@ -87,5 +87,39 @@ input[type="number"] {
   right: 10px;
   width: 150px;
   height: auto;
-  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  #toggle-button {
+    top: 5px;
+    left: 5px;
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+
+  #control-panel {
+    top: 40px;
+    left: 5px;
+    max-width: 150px;
+    padding: 10px;
+    font-size: 12px;
+  }
+
+  #control-panel input[type="number"] {
+    font-size: 12px;
+    padding: 3px;
+  }
+
+  #pause-play-btn {
+    width: 120px;
+    height: 35px;
+    font-size: medium;
+    bottom: 20px;
+  }
+
+  #nav-icon {
+    width: 100px; /* Reduce size for smaller screens */
+    top: 5px;
+    right: 5px;
+  }
 }

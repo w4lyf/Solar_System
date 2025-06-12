@@ -3,8 +3,8 @@ import { Planet } from './planet.js';
 import { setupCameraControls } from './cameraControls.js';
 
 const scene = new THREE.Scene();  // Create a new scene
+const viewSize = Math.min(window.innerWidth, window.innerHeight) * 2 + 4000; // Dynamically scale view size
 const aspect = window.innerWidth / window.innerHeight;
-const viewSize = 4000;  // Size of the view
 
 const camera = new THREE.OrthographicCamera(  // Create an orthographic camera
   -aspect * viewSize / 2, aspect * viewSize / 2,
@@ -21,6 +21,19 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+
+// Mobile window resizing
+window.addEventListener('resize', () => {
+  const aspect = window.innerWidth / window.innerHeight;
+
+  camera.left = -aspect * viewSize / 2;
+  camera.right = aspect * viewSize / 2;
+  camera.top = viewSize / 2;
+  camera.bottom = -viewSize / 2;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
 
 // Load textures
 const textureLoader = new THREE.TextureLoader();
