@@ -111,5 +111,4 @@ solar-system/
 * [Three.js](https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js) (CDN)
 * `npx serve` for local development.
 
-```
 
