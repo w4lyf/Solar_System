@@ -3,7 +3,7 @@ import { Planet } from './planet.js';
 import { setupCameraControls } from './cameraControls.js';
 
 const scene = new THREE.Scene();  // Create a new scene
-const viewSize = Math.min(window.innerWidth, window.innerHeight) * 2 + 4000; // Dynamically scale view size
+const viewSize = Math.min(window.innerWidth, window.innerHeight) * 2 + 4000;
 const aspect = window.innerWidth / window.innerHeight;
 
 const camera = new THREE.OrthographicCamera(  // Create an orthographic camera
@@ -152,7 +152,7 @@ if (pausePlayBtn) { // Pause/Play Button logic
     if (isPaused) { // Play
       Object.keys(planets).forEach(planetName => {
         planets[planetName].currentSpeed = planets[planetName].savedSpeed;  // Restore saved speed
-        planets[planetName].rotationSpeed = planetConfig.find(p => p.name === planetName).rotationSpeed;
+        planets[planetName].rotationSpeed = planetConfig.find(p => p.name === planetName).spinsPerOrbit / 365.25 * planets[planetName].currentSpeed;
       });
       pausePlayBtn.textContent = 'Pause';
       isPaused = false;
